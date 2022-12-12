@@ -1,31 +1,27 @@
-import { gql, useMutation } from '@apollo/client'
 import { useState, FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Logo } from '../components/Logo'
-
-const CREATE_SUBSCRIBE_MUTATION = gql`
-  mutation CreateSubscriber($name: String!, $email: String!) {
-    createSubscriber(data: { name: $name, email: $email }) {
-      id
-    }
-  }
-`
+import { useCreateSubscriberMutation } from '../graphql/generated'
 
 export function Subscribe() {
+  const navigate = useNavigate()
+
   /* transformar em reeducer */
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
 
   /* recebe funcao, nela vc coloca as variaveis que deseja passar */
-  const [createSubscriber] = useMutation(CREATE_SUBSCRIBE_MUTATION)
+  const [createSubscriber, { loading }] = useCreateSubscriberMutation()
 
-  function handleSubscribe(event: FormEvent) {
+  async function handleSubscribe(event: FormEvent) {
     event.preventDefault()
-    createSubscriber({
+    await createSubscriber({
       variables: {
         name,
         email,
       },
     })
+    navigate('/event')
   }
 
   return (
@@ -65,8 +61,9 @@ export function Subscribe() {
               onChange={(event) => setEmail(event.target.value)}
             />
             <button
+              disabled={loading}
               type="submit"
-              className="mt-4 bg-green-500 uppercase py-4 rounded font-bold text-sm hover:bg-green-700 transition-colors"
+              className="mt-4 bg-green-500 uppercase py-4 rounded font-bold text-sm hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Secure my spot
             </button>
